@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+@theme {
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --font-sans: "IBM Plex Sans", ui-sans-serif, sans-serif;
+
+  --color-ink: #0B0F14;
+  --color-panel: #12181F;
+  --color-panel-raised: #171F28;
+  --color-line: #232C37;
+  --color-text: #E7ECF2;
+  --color-text-dim: #8B98A8;
+
+  --color-scan: #4C8DFF;
+  --color-safe: #3DD68C;
+  --color-warn: #F5B94D;
+  --color-danger: #F2495C;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+
+@keyframes scanline {
+  0% { transform: translateY(-120%); opacity: 0; }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { transform: translateY(120%); opacity: 0; }
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+html, body, #root {
+  height: 100%;
+  background: var(--color-ink);
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--color-text);
+}
+
+::selection {
+  background: var(--color-scan);
+  color: var(--color-ink);
+}
+
+/* subtle atmosphere on the ink background */
+.grain-bg {
+  background-image:
+    radial-gradient(ellipse at top, rgba(76,141,255,0.07), transparent 60%),
+    repeating-linear-gradient(180deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 3px);
+}
+
+.animate-scanline {
+  animation: scanline 1.6s ease-in-out;
+}
+
+.animate-rise {
+  animation: rise 0.35s ease-out both;
+}
+
+.animate-blink {
+  animation: blink 1.6s ease-in-out infinite;
+}
