@@ -9,9 +9,8 @@ services:
       - key: PORT
         value: 8787
 
-  - type: static
+  - type: static_site
     name: careershield-ui
-    env: static
     rootDir: careershield-ai
     buildCommand: npm install && npm run build
     staticPublishPath: dist
