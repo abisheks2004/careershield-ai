@@ -1,8 +1,8 @@
-// Client-side heuristic scoring engine.
+// Shared heuristic scoring engine used by the browser demo and API.
 // This mirrors the weighted signal model from the CareerShield AI spec (section 8).
-// It is a placeholder for the real backend: Node/Express risk-scoring service +
-// ML classifier + threat-intel lookups + GenAI explanation layer.
-// Swap `runAnalysis` for a fetch() to POST /api/analyze/* once the backend exists.
+// It is a placeholder for the production pipeline: ML classifier +
+// threat-intel lookups + GenAI explanation layer.
+// The API can use this module directly until a production ML pipeline replaces it.
 
 const CATEGORY = (score) => {
   if (score <= 30) return "Low Risk";
@@ -102,7 +102,8 @@ function analyzeUrl(raw) {
   let parsed = null;
 
   try {
-    parsed = new URL(raw.startsWith("http") ? raw : `https://${raw}`);
+    const normalized = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+    parsed = new URL(normalized);
     hostname = parsed.hostname;
   } catch {
     signals.push({ weight: 20, label: "URL could not be parsed — malformed structure" });
@@ -131,7 +132,7 @@ function analyzeUrl(raw) {
     signals.push({ weight: 40, label: `Domain references "${impersonated}" but is not the official domain — likely impersonation` });
     score += 40;
   }
-  if (!raw.startsWith("https://")) {
+  if (!/^https:\/\//i.test(raw)) {
     signals.push({ weight: 10, label: "No HTTPS — connection is not encrypted" });
     score += 10;
   }
@@ -151,6 +152,13 @@ const RECOMMENDATIONS = {
 };
 
 export function runAnalysis(type, input) {
+  if (!["job", "message", "url"].includes(type)) {
+    throw new Error(`Unsupported scan type: ${type}`);
+  }
+  if (typeof input !== "string" || !input.trim()) {
+    throw new Error("Scan input must be a non-empty string");
+  }
+
   let result;
   if (type === "job") result = analyzeJob(input);
   else if (type === "message") result = analyzeMessage(input);
@@ -158,7 +166,7 @@ export function runAnalysis(type, input) {
 
   const riskLevel = CATEGORY(result.score);
   return {
-    id: crypto.randomUUID(),
+    id: globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`,
     type,
     input,
     score: result.score,

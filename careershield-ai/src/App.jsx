@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ShieldHalf } from "lucide-react";
 import ScanConsole from "./components/ScanConsole";
 import ScanReport from "./components/ScanReport";
@@ -9,18 +9,25 @@ export default function App() {
   const [history, setHistory] = useState([]);
   const [activeReport, setActiveReport] = useState(null);
   const [isScanning, setIsScanning] = useState(false);
+  const scanTimerRef = useRef(null);
 
   function handleScan(type, input) {
+    if (scanTimerRef.current) clearTimeout(scanTimerRef.current);
     setIsScanning(true);
     // Simulated latency stands in for the real pipeline:
     // preprocessing -> risk scoring -> threat intel -> RAG -> LLM explanation.
-    setTimeout(() => {
+    scanTimerRef.current = setTimeout(() => {
       const report = runAnalysis(type, input);
       setActiveReport(report);
       setHistory((prev) => [report, ...prev].slice(0, 20));
       setIsScanning(false);
+      scanTimerRef.current = null;
     }, 650);
   }
+
+  useEffect(() => () => {
+    if (scanTimerRef.current) clearTimeout(scanTimerRef.current);
+  }, []);
 
   return (
     <div className="min-h-screen grain-bg text-text">
