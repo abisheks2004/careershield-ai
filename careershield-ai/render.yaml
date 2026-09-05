@@ -2,7 +2,7 @@ services:
   - type: web
     name: careershield-api
     env: node
-    rootDir: ./
+    rootDir: careershield-ai
     buildCommand: npm install
     startCommand: npm run server
     envVars:
@@ -12,9 +12,9 @@ services:
   - type: static
     name: careershield-ui
     env: static
-    rootDir: ./
+    rootDir: careershield-ai
     buildCommand: npm install && npm run build
-    staticPublishPath: ./dist
+    staticPublishPath: dist
     envVars:
       - key: VITE_API_URL
         sync: false
