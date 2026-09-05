@@ -5,24 +5,60 @@ import ScanReport from "./components/ScanReport";
 import ScanHistory from "./components/ScanHistory";
 import { runAnalysis } from "./lib/analyzer";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || "";
+
 export default function App() {
   const [history, setHistory] = useState([]);
   const [activeReport, setActiveReport] = useState(null);
   const [isScanning, setIsScanning] = useState(false);
   const scanTimerRef = useRef(null);
 
-  function handleScan(type, input) {
+  async function handleScan(type, input) {
     if (scanTimerRef.current) clearTimeout(scanTimerRef.current);
     setIsScanning(true);
-    // Simulated latency stands in for the real pipeline:
-    // preprocessing -> risk scoring -> threat intel -> RAG -> LLM explanation.
-    scanTimerRef.current = setTimeout(() => {
-      const report = runAnalysis(type, input);
-      setActiveReport(report);
-      setHistory((prev) => [report, ...prev].slice(0, 20));
+
+    try {
+      if (API_BASE_URL) {
+        const response = await fetch(`${API_BASE_URL}/api/analyze`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ type, input }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Request failed with status ${response.status}`);
+        }
+
+        const report = await response.json();
+        setActiveReport(report);
+        setHistory((prev) => [report, ...prev].slice(0, 20));
+        setIsScanning(false);
+        return;
+      }
+
+      // Simulated latency stands in for the real pipeline:
+      // preprocessing -> risk scoring -> threat intel -> RAG -> LLM explanation.
+      scanTimerRef.current = setTimeout(() => {
+        const report = runAnalysis(type, input);
+        setActiveReport(report);
+        setHistory((prev) => [report, ...prev].slice(0, 20));
+        setIsScanning(false);
+        scanTimerRef.current = null;
+      }, 650);
+    } catch (error) {
       setIsScanning(false);
-      scanTimerRef.current = null;
-    }, 650);
+      setActiveReport({
+        id: `error-${Date.now()}`,
+        type,
+        input,
+        score: 0,
+        riskLevel: "Low Risk",
+        signals: [{ weight: 0, label: "Unable to reach the scanning service. Please try again." }],
+        recommendation: "The scan service is unavailable. Check the backend URL and try again.",
+        createdAt: new Date().toISOString(),
+      });
+      console.error("Scan request failed", error);
+    }
   }
 
   useEffect(() => () => {

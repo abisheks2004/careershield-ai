@@ -26,6 +26,22 @@ npm run server
 
 The API exposes `GET /api/health` and `POST /api/analyze` with a JSON body containing `type` (`job`, `message`, or `url`) and `input`.
 
+## Render deployment
+
+Use two Render services:
+
+1. Web Service for the API
+   - Root directory: `careershield-ai`
+   - Build command: `npm install`
+   - Start command: `npm run server`
+   - Environment variable: `PORT=8787`
+
+2. Static Site for the frontend
+   - Root directory: `careershield-ai`
+   - Build command: `npm install && npm run build`
+   - Publish directory: `dist`
+   - Environment variable: `VITE_API_URL=https://your-render-api-url.onrender.com`
+
 ## Build for publishing
 
 ```bash
