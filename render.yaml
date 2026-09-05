@@ -1,0 +1,6 @@
+services:
+  - type: static
+    name: careershield-ui
+    rootDir: careershield-ai
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
