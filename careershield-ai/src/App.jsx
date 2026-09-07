@@ -1,69 +1,34 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { ShieldHalf } from "lucide-react";
 import ScanConsole from "./components/ScanConsole";
 import ScanReport from "./components/ScanReport";
 import ScanHistory from "./components/ScanHistory";
 import { runAnalysis } from "./lib/analyzer";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "";
-
 export default function App() {
   const [history, setHistory] = useState([]);
   const [activeReport, setActiveReport] = useState(null);
   const [isScanning, setIsScanning] = useState(false);
-  const scanTimerRef = useRef(null);
-
   async function handleScan(type, input) {
-    if (scanTimerRef.current) clearTimeout(scanTimerRef.current);
     setIsScanning(true);
-
     try {
-      if (API_BASE_URL) {
-        const response = await fetch(`${API_BASE_URL}/api/analyze`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ type, input }),
-        });
-
-        if (!response.ok) {
-          throw new Error(`Request failed with status ${response.status}`);
-        }
-
-        const report = await response.json();
-        setActiveReport(report);
-        setHistory((prev) => [report, ...prev].slice(0, 20));
-        setIsScanning(false);
-        return;
-      }
-
-      // Simulated latency stands in for the real pipeline:
-      // preprocessing -> risk scoring -> threat intel -> RAG -> LLM explanation.
-      scanTimerRef.current = setTimeout(() => {
-        const report = runAnalysis(type, input);
-        setActiveReport(report);
-        setHistory((prev) => [report, ...prev].slice(0, 20));
-        setIsScanning(false);
-        scanTimerRef.current = null;
-      }, 650);
-    } catch (error) {
-      setIsScanning(false);
-      setActiveReport({
-        id: `error-${Date.now()}`,
-        type,
-        input,
-        score: 0,
-        riskLevel: "Low Risk",
-        signals: [{ weight: 0, label: "Unable to reach the scanning service. Please try again." }],
-        recommendation: "The scan service is unavailable. Check the backend URL and try again.",
-        createdAt: new Date().toISOString(),
+      const response = await fetch(`${import.meta.env.VITE_API_URL || ""}/api/analyze`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type, input }),
       });
-      console.error("Scan request failed", error);
+      if (!response.ok) throw new Error("The analysis service is unavailable.");
+      const report = await response.json();
+      setActiveReport(report);
+      setHistory((prev) => [report, ...prev].slice(0, 20));
+    } catch {
+      const report = runAnalysis(type, input);
+      setActiveReport({ ...report, source: "local-fallback", webCheck: { found: false } });
+      setHistory((prev) => [{ ...report, source: "local-fallback" }, ...prev].slice(0, 20));
+    } finally {
+      setIsScanning(false);
     }
   }
-
-  useEffect(() => () => {
-    if (scanTimerRef.current) clearTimeout(scanTimerRef.current);
-  }, []);
 
   return (
     <div className="min-h-screen grain-bg text-text">
@@ -78,7 +43,7 @@ export default function App() {
           <div className="flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-safe animate-blink" />
             <span className="font-mono text-[11px] uppercase tracking-widest text-text-dim">
-              Client-side demo — mock scoring
+              Live scam screening
             </span>
           </div>
         </div>
@@ -87,11 +52,11 @@ export default function App() {
       <main className="max-w-5xl mx-auto px-6 py-10">
         <div className="mb-8 max-w-2xl">
           <h1 className="text-2xl font-semibold tracking-tight mb-2">
-            Scan a job, link, or message before you trust it
+            Check it before you trust it
           </h1>
           <p className="text-text-dim text-sm leading-relaxed">
-            CareerShield AI checks recruitment content against known scam patterns and
-            returns a risk score with the evidence behind it — not just a safe/unsafe verdict.
+            Paste a job offer, link, or message. CareerShield looks for warning signs and
+            explains what it finds.
           </p>
         </div>
 
@@ -110,9 +75,8 @@ export default function App() {
 
       <footer className="max-w-5xl mx-auto px-6 py-8 mt-4">
         <p className="font-mono text-[11px] text-text-dim">
-          This scoring runs entirely in your browser as a placeholder. The full architecture
-          (ML classifier, URL threat intelligence, RAG knowledge base, GenAI explanation layer)
-          is described in the project spec.
+          Results are a helpful warning, not a guarantee. Always verify the company before
+          sharing money or personal information.
         </p>
       </footer>
     </div>

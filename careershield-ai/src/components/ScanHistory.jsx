@@ -9,12 +9,12 @@ export default function ScanHistory({ history, onSelect, activeId }) {
       <div className="px-4 py-2.5 border-b border-line flex items-center gap-2">
         <History size={13} className="text-text-dim" />
         <span className="font-mono text-[11px] uppercase tracking-widest text-text-dim">
-          Recent Scans ({history.length})
+          Previous checks ({history.length})
         </span>
       </div>
       <ul className="divide-y divide-line max-h-64 overflow-y-auto">
         {history.map((r) => {
-          const color = riskColorVar(r.riskLevel);
+          const color = riskColorVar(r.riskLevel, r.score);
           const isActive = r.id === activeId;
           return (
             <li key={r.id}>
