@@ -1,5 +1,11 @@
 import { spawn } from "node:child_process";
 
+try {
+  process.loadEnvFile?.();
+} catch {
+  // .env is optional
+}
+
 const api = spawn(process.execPath, ["server.js"], { stdio: "inherit" });
 const vite = spawn("vite", [], { stdio: "inherit", shell: true });
 

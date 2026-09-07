@@ -1,0 +1,38 @@
+name: CareerShield AI CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./careershield-ai
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: './careershield-ai/package-lock.json'
+
+      - name: Install dependencies
+        run: npm ci || npm install
+
+      - name: Run linter
+        run: npm run lint
+
+      - name: Run test suite
+        run: npm test
+
+      - name: Build frontend
+        run: npm run build
