@@ -8,7 +8,7 @@ services:
     envVars:
       - key: PORT
         value: 8787
-  - type: web
+
   - type: web
     name: careershield-ui
     runtime: static

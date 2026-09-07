@@ -9,7 +9,6 @@ export default function App() {
   const [history, setHistory] = useState([]);
   const [activeReport, setActiveReport] = useState(null);
   const [isScanning, setIsScanning] = useState(false);
-
   async function handleScan(type, input) {
     setIsScanning(true);
     try {

@@ -43,6 +43,7 @@ export default function ScanConsole({ onScan, isScanning }) {
           return (
             <button
               key={tab.id}
+              type="button"
               onClick={() => handleTabChange(tab.id)}
               className={`flex items-center gap-1.5 px-3 py-2 text-xs font-mono uppercase tracking-wide rounded-t-md transition-colors ${
                 isActive
@@ -59,7 +60,7 @@ export default function ScanConsole({ onScan, isScanning }) {
 
       <form onSubmit={handleSubmit} className="p-4">
         <div className="flex items-center justify-between mb-2">
-          <label className="font-mono text-[11px] uppercase tracking-widest text-text-dim">
+          <label htmlFor="scan-input" className="font-mono text-[11px] uppercase tracking-widest text-text-dim">
             {active.label} to check
           </label>
           <button
@@ -71,6 +72,8 @@ export default function ScanConsole({ onScan, isScanning }) {
           </button>
         </div>
         <textarea
+          id="scan-input"
+          aria-label={`Input for ${active.label}`}
           value={value}
           onChange={(e) => setValue(e.target.value)}
           placeholder={active.placeholder}
