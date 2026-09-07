@@ -1,7 +1,20 @@
 services:
   - type: web
+    name: careershield-api
+    env: node
+    rootDir: careershield-ai
+    buildCommand: npm install
+    startCommand: npm run server
+    envVars:
+      - key: PORT
+        value: 8787
+  - type: web
+  - type: web
     name: careershield-ui
     runtime: static
     rootDir: careershield-ai
     buildCommand: npm install && npm run build
     staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        sync: false

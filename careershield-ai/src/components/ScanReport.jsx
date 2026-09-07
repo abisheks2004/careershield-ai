@@ -3,6 +3,7 @@ import RiskGauge from "./RiskGauge";
 import { riskColorVar } from "../lib/analyzer";
 
 const RISK_ICON = {
+  "No Risk": ShieldCheck,
   "Low Risk": ShieldCheck,
   Suspicious: ShieldAlert,
   "High Risk": AlertTriangle,
@@ -15,16 +16,16 @@ export default function ScanReport({ report }) {
       <div className="bg-panel border border-line rounded-lg h-full min-h-[420px] flex flex-col items-center justify-center text-center px-8">
         <Radar size={36} className="text-line mb-3" strokeWidth={1.5} />
         <p className="font-mono text-xs uppercase tracking-widest text-text-dim">
-          Awaiting input
+          Your results will appear here
         </p>
         <p className="text-sm text-text-dim mt-2 max-w-xs">
-          Submit a job description, link, or message on the left to generate a risk report.
+          Add a job offer, link, or message to see what we find.
         </p>
       </div>
     );
   }
 
-  const color = riskColorVar(report.riskLevel);
+  const color = riskColorVar(report.riskLevel, report.score);
   const Icon = RISK_ICON[report.riskLevel];
 
   return (
@@ -40,7 +41,7 @@ export default function ScanReport({ report }) {
         <div className="flex items-center gap-2">
           <Icon size={16} style={{ color }} />
           <span className="font-mono text-xs uppercase tracking-widest text-text-dim">
-            Scan Report // {report.type}
+            Check results · {report.type}
           </span>
         </div>
         <span className="font-mono text-[11px] text-text-dim">
@@ -60,7 +61,7 @@ export default function ScanReport({ report }) {
 
       <div className="relative px-5 py-4 border-b border-line">
         <p className="font-mono text-[11px] uppercase tracking-widest text-text-dim mb-3">
-          Detected Signals
+          Why this was flagged
         </p>
         <ul className="space-y-2">
           {report.signals.map((s, i) => (
@@ -68,8 +69,8 @@ export default function ScanReport({ report }) {
               <span
                 className="shrink-0 tabular-nums px-1.5 py-0.5 rounded text-[11px] font-semibold"
                 style={{
-                  color: s.weight > 0 ? color : "var(--color-text-dim)",
-                  backgroundColor: s.weight > 0 ? `${color}14` : "transparent",
+                  color: s.weight > 0 ? "var(--color-danger)" : "var(--color-text-dim)",
+                  backgroundColor: s.weight > 0 ? "color-mix(in srgb, var(--color-danger) 10%, transparent)" : "transparent",
                 }}
               >
                 {s.weight > 0 ? `+${s.weight}` : "—"}
@@ -82,10 +83,44 @@ export default function ScanReport({ report }) {
 
       <div className="relative px-5 py-4">
         <p className="font-mono text-[11px] uppercase tracking-widest text-text-dim mb-2">
-          Recommendation
+          What to do next
         </p>
         <p className="text-sm leading-relaxed text-text">{report.recommendation}</p>
       </div>
+
+      {report.webCheck && (
+        <div className="relative px-5 py-4 border-t border-line">
+          <div className="flex items-center justify-between mb-2">
+            <p className="font-mono text-[11px] uppercase tracking-widest text-text-dim">
+              Online check
+            </p>
+            <span className={`font-mono text-[11px] uppercase ${report.webCheck.found ? "text-safe" : "text-warn"}`}>
+              {report.webCheck.found ? "Related results found" : "Nothing found"}
+            </span>
+          </div>
+          {report.webCheck.results?.length > 0 ? (
+            <ul className="space-y-2">
+              {report.webCheck.results.map((result) => (
+                <li key={result.url}>
+                  <a
+                    href={result.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-sm text-scan hover:underline"
+                  >
+                    {result.title}
+                  </a>
+                  <p className="text-xs text-text-dim mt-0.5 line-clamp-2">{result.snippet}</p>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-xs text-text-dim">
+              We could not find a public result for this information.
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 }

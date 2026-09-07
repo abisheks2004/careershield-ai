@@ -5,6 +5,7 @@
 // Swap `runAnalysis` for a fetch() to POST /api/analyze/* once the backend exists.
 
 const CATEGORY = (score) => {
+  if (score === 0) return "No Risk";
   if (score <= 30) return "Low Risk";
   if (score <= 60) return "Suspicious";
   if (score <= 80) return "High Risk";
@@ -144,6 +145,7 @@ function analyzeUrl(raw) {
 }
 
 const RECOMMENDATIONS = {
+  "No Risk": "No warning signs were found. Still confirm the recruiter and company independently before sharing personal information.",
   "Low Risk": "No strong warning signs found. Still confirm the recruiter and company independently before sharing personal information.",
   Suspicious: "Some warning signs were found. Verify the company, recruiter, and any links independently before proceeding.",
   "High Risk": "Multiple strong warning signs were found. Do not pay money or share sensitive information until the employer and recruitment channel are independently verified.",
@@ -157,6 +159,12 @@ export function runAnalysis(type, input) {
   else result = analyzeUrl(input);
 
   const riskLevel = CATEGORY(result.score);
+  const recommendation = result.signals.some((signal) => signal.weight > 0)
+    ? riskLevel === "Low Risk"
+      ? "A few warning signs were found, but the overall risk is low. Verify the recruiter before sharing personal information."
+      : RECOMMENDATIONS[riskLevel]
+    : RECOMMENDATIONS[riskLevel];
+
   return {
     id: crypto.randomUUID(),
     type,
@@ -164,14 +172,16 @@ export function runAnalysis(type, input) {
     score: result.score,
     riskLevel,
     signals: result.signals,
-    recommendation: RECOMMENDATIONS[riskLevel],
+    recommendation,
     createdAt: new Date().toISOString(),
   };
 }
 
-export function riskColorVar(riskLevel) {
+export function riskColorVar(riskLevel, score) {
+  if (score > 0) return "var(--color-danger)";
+
   switch (riskLevel) {
-    case "Low Risk":
+    case "No Risk":
       return "var(--color-safe)";
     case "Suspicious":
       return "var(--color-warn)";

@@ -8,7 +8,7 @@ export default function RiskGauge({ score, riskLevel, size = 168 }) {
   const arcFraction = 0.75; // 270-degree arc, like a scanner sweep
   const arcLength = circumference * arcFraction;
   const gapLength = circumference - arcLength;
-  const color = riskColorVar(riskLevel);
+  const color = riskColorVar(riskLevel, score);
 
   useEffect(() => {
     setAnimatedScore(0);

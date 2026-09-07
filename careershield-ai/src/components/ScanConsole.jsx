@@ -60,14 +60,14 @@ export default function ScanConsole({ onScan, isScanning }) {
       <form onSubmit={handleSubmit} className="p-4">
         <div className="flex items-center justify-between mb-2">
           <label className="font-mono text-[11px] uppercase tracking-widest text-text-dim">
-            Input // {active.label}
+            {active.label} to check
           </label>
           <button
             type="button"
             onClick={fillSample}
             className="font-mono text-[11px] text-scan hover:underline"
           >
-            load sample
+            use example
           </button>
         </div>
         <textarea
@@ -80,10 +80,10 @@ export default function ScanConsole({ onScan, isScanning }) {
         <button
           type="submit"
           disabled={!value.trim() || isScanning}
-          className="mt-3 w-full flex items-center justify-center gap-2 bg-scan text-ink font-mono text-sm font-semibold uppercase tracking-wide py-2.5 rounded-md hover:brightness-110 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+          className="mt-3 w-full flex items-center justify-center gap-2 bg-scan text-black font-mono text-sm font-semibold uppercase tracking-wide py-2.5 rounded-md shadow-[0_8px_24px_rgba(214,169,40,0.2)] hover:brightness-125 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
         >
           <ScanLine size={15} className={isScanning ? "animate-spin" : ""} />
-          {isScanning ? "Scanning..." : "Run Scan"}
+          {isScanning ? "Checking..." : "Check now"}
         </button>
       </form>
     </div>
